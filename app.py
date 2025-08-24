@@ -36,6 +36,35 @@ from sklearn.model_selection import train_test_split
 import pickle
 from typing import List, Tuple, Dict, Any
 
+# Basic input-side guardrail: validate user queries
+def validate_query(query: str) -> Tuple[bool, str]:
+    """Return (is_valid, message). Blocks harmful/irrelevant inputs.
+    Rules:
+    - Non-empty and at least 3 characters
+    - No obvious PII requests (passwords, SSN)
+    - No harmful content keywords
+    - Encourage financial/topic relevance
+    """
+    if not query or not isinstance(query, str):
+        return False, "Please enter a question."
+    if len(query.strip()) < 3:
+        return False, "Query is too short. Please provide a meaningful question."
+
+    lowered = query.lower()
+    blocked_keywords = [
+        "password", "ssn", "social security", "credit card", "cvv",
+        "hack", "malware", "exploit", "sql injection", "xss"
+    ]
+    if any(k in lowered for k in blocked_keywords):
+        return False, "This query appears unsafe or requests sensitive information."
+
+    # Soft guidance towards finance/doc-related topics
+    finance_hints = ["revenue", "income", "margin", "assets", "growth", "q4", "2023", "2024", "freshworks", "amazon", "alphabet"]
+    if not any(h in lowered for h in finance_hints):
+        return True, "Note: Your query may be off-topic. Results could be limited."
+
+    return True, ""
+
 # Page configuration
 st.set_page_config(
     page_title="Financial QA: RAG vs Adapter-FT",
@@ -1122,6 +1151,12 @@ def show_rag_page():
     query = st.text_input("Enter your financial question:", placeholder="e.g., What was Alphabet's revenue in Q4 2023?")
     
     if query and st.button("Generate RAG Answer"):
+        is_valid, msg = validate_query(query)
+        if not is_valid:
+            st.warning(msg)
+            return
+        elif msg:
+            st.info(msg)
         with st.spinner("Generating answer..."):
             answer, sources = rag_answer(query, st.session_state.index, st.session_state.embedder, st.session_state.chunks)
             
@@ -1236,6 +1271,12 @@ def show_finetune_page():
     query = st.text_input("Test question:", placeholder="e.g., What was Amazon's net income?")
     
     if query and st.button("Generate FT Answer"):
+        is_valid, msg = validate_query(query)
+        if not is_valid:
+            st.warning(msg)
+            return
+        elif msg:
+            st.info(msg)
         if st.session_state.peft_model is None:
             st.warning("Please train or load an adapter first")
         else:
