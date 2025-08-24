@@ -6,10 +6,12 @@
 # | No | Member Name             | Student ID |
 # |----|-------------------------|------------|
 # |  1 |Aishwarya Jagtap         | 2022ac05214           
-# |  2 |Jatin Sherawat           | 2023ac05193           
+# |  2 |Jatin Sehrawat           | 2023ac05193           
 # |  3 |Nilesh Das               | 2023ac05150           
 # |  4 |Nisarga P Jamakhandi     | 2023ac05326           
-# |  5 |Pankaj Kumar             | 2023ac05140           
+# |  5 |Pankaj Kumar             | 2023ac05140          
+#
+# TESTING AND COMPARISON TABLES IN PDF REPORT : Group 22 Report _ Conversational AI Assignment 2.pdf
 # =============================================================================
 # Install dependencies if not already available
 
